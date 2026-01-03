@@ -15,18 +15,14 @@ The system was developed iteratively in the context of a real-world legal compli
 2.1 Initial Approach
 
 The initial system followed a conventional hybrid RAG design:
-OCR and text normalization of legal documents
-Fixed-size chunking with overlap
-Semantic vector search (embeddings)
-Keyword-based search with heuristic weighting
-Top-k chunk injection into a large language model
+OCR and text normalization of legal documents / Fixed-size chunking with overlap /Semantic vector search (embeddings) / Keyword-based search with heuristic weighting / Top-k chunk injection into a large language model
 This baseline was intentionally simple and served as a reference point for identifying failure modes.
 
 2.2 Observed Failure Modes
 
 In practice, several structural issues emerged:
 Semantic redundancy amplification : 
-Similar articles located in different sections were retrieved simultaneously, overwhelming the LLM with near-duplicate information.
+Similar articles located in different sections were retrieved simultaneously, overwhelming the LLM with near-duplicate or irrelevant information (even if the phrasing is alike, some rules apply in certain sections and not other, and those rules were sometimes wrongfully retrieved because the location of the rules was not taken into account).
 
 Loss of normative context : 
 Chunking ignored legal structure (zones, applicability conditions), leading to answers that were linguistically relevant but legally invalid.
@@ -36,14 +32,12 @@ Increasing chunk size to preserve context reduced precision; decreasing it incre
 
 Implicit reasoning leakage : 
 The LLM inferred applicability implicitly instead of being constrained explicitly, which is undesirable in legal settings.
-
 These limitations motivated a shift away from purely text-centric retrieval.
 
 3. Design Hypothesis
 
 Legal retrieval requires explicit structural constraints before semantic ranking.
-Rather than asking the LLM to infer legal structure from text, the system should:
-encode explicit applicability rules symbolically, and use semantic similarity within a constrained search space.
+Rather than asking the LLM to infer legal structure from text, the system should: encode explicit applicability rules symbolically, and use semantic similarity within a constrained search space.
 
 This led to a two-layer architecture:
 Symbolic filtering via a lightweight knowledge graph
